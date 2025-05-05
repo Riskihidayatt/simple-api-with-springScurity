@@ -1,0 +1,1278 @@
+{
+	"info": {
+		"_postman_id": "35b1003d-14fb-4991-a52d-0bc3bf4d44b4",
+		"name": "SpringBoot Live Code API",
+		"description": "Collection for the Spring Boot Live Code project endpoints.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "34298184"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Capture auth token",
+									"pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+									"var jsonData = pm.response.json();",
+									"if (jsonData && jsonData.data && jsonData.data.token) {",
+									"    pm.environment.set(\"authToken\", jsonData.data.token);",
+									"    console.log(\"Auth Token set.\");",
+									"} else { console.log(\"Could not find token in response.\"); }",
+									"// Capture admin user ID (example)",
+									"if (jsonData && jsonData.data && jsonData.data.username === \"admin\") {",
+									"   pm.environment.set(\"adminUserId\", jsonData.data.id);",
+									"   console.log(\"Admin User ID set.\");",
+									"}",
+									"// Capture staff01 user ID (example)",
+									"if (jsonData && jsonData.data && jsonData.data.username === \"staff01\") {",
+									"   pm.environment.set(\"staffUserId\", jsonData.data.id);",
+									"   console.log(\"Staff01 User ID set.\");",
+									"}",
+									"// Capture budi customer user ID (example)",
+									"if (jsonData && jsonData.data && jsonData.data.username === \"budi_santoso\") {",
+									"   pm.environment.set(\"budiUserId\", jsonData.data.id);",
+									"   console.log(\"Budi User ID set.\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"admin\",\n    \"password\": \"admin1234\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Authenticates a user and returns a JWT token. Try with `admin`/`admin1234`, `staff01`/`staff1234`, `budi_santoso`/`cus123456`. Captures token to `authToken` environment variable."
+					},
+					"response": []
+				},
+				{
+					"name": "Register Customer",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"newcustomer01\",\n    \"email\": \"newcust01@mail.com\",\n    \"password\": \"password123\",\n    \"fullname\": \"New Customer One\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register-customer",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register-customer"
+							]
+						},
+						"description": "Public endpoint to register a new user with the CUSTOMER role."
+					},
+					"response": []
+				},
+				{
+					"name": "Register Staff (Admin Only)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"description": "Use Admin's token",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"newstaff03\",\n    \"email\": \"newstaff03@livecode.com\",\n    \"password\": \"staffpass123\",\n    \"fullname\": \"New Staff Three\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register-staff",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register-staff"
+							]
+						},
+						"description": "Registers a new user with the STAFF role. Requires ADMIN authentication."
+					},
+					"response": []
+				}
+			],
+			"description": "Authentication related endpoints"
+		},
+		{
+			"name": "Customers",
+			"item": [
+				{
+					"name": "Create Customer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Capture customer ID",
+									"pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
+									"var jsonData = pm.response.json();",
+									"if (jsonData && jsonData.data && jsonData.data.id) {",
+									"   pm.environment.set(\"customerId\", jsonData.data.id); // Store the newly created ID",
+									"   console.log(\"New Customer ID set to: \" + jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"description": "Use Staff or Admin token",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Andi Wijaya\",\n    \"birthdate\": \"1998-03-20\",\n    \"birthplace\": \"Medan\",\n    \"username\": \"andi_w\",       // Optional: Creates login if provided\n    \"email\": \"andi.w@mail.com\", // Optional: Creates login if provided\n    \"password\": \"password123\"   // Optional: Creates login if provided (min 8 chars)\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/customers",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"customers"
+							]
+						},
+						"description": "Creates a new customer record. Can optionally create a linked CUSTOMER login user. Requires Staff or Admin auth. Captures ID to `customerId` variable."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Customers (Paginated)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"description": "Use Staff or Admin token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/customers?page=0&size=5&sort=name,asc",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"customers"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0",
+									"description": "(Default: 0)"
+								},
+								{
+									"key": "size",
+									"value": "5",
+									"description": "(Default: 10)"
+								},
+								{
+									"key": "sort",
+									"value": "name,asc",
+									"description": "(Optional: e.g., `birthDate,desc`)"
+								}
+							]
+						},
+						"description": "Retrieves a paginated list of all customers. Requires Staff or Admin auth."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Customer By ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"description": "Use Staff or Admin token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/customers/{{customerId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"customers",
+								"{{customerId}}"
+							],
+							"variable": [
+								{
+									"key": "customerId",
+									"value": "",
+									"description": "Replace with an actual customer UUID or use variable"
+								}
+							]
+						},
+						"description": "Retrieves a specific customer by their UUID. Requires Staff or Admin auth."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Customer",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"description": "Use Staff or Admin token",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Andi Wijaya Updated\",\n    \"birthdate\": \"1998-03-21\",\n    \"birthplace\": \"Jakarta\",\n    \"username\": \"andi_w\",       // Note: Updating login via this endpoint is NOT supported by the service impl\n    \"email\": \"andi.w.new@mail.com\",\n    \"password\": \"newpassword123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/customers/{{customerId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"customers",
+								"{{customerId}}"
+							],
+							"variable": [
+								{
+									"key": "customerId",
+									"value": "",
+									"description": "Use the ID of the customer to update"
+								}
+							]
+						},
+						"description": "Updates an existing customer's basic details (name, birthdate, birthplace). Does NOT update linked login info. Requires Staff or Admin auth."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Customer (Admin Only)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"description": "Use Admin token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/customers/{{customerId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"customers",
+								"{{customerId}}"
+							],
+							"variable": [
+								{
+									"key": "customerId",
+									"value": "",
+									"description": "Use the ID of the customer to delete"
+								}
+							]
+						},
+						"description": "Deletes a customer by UUID. Fails if the customer has transactions. Requires ADMIN authentication."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints for managing customers (Requires Staff/Admin Auth generally)"
+		},
+		{
+			"name": "Products",
+			"item": [
+				{
+					"name": "Create Product",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Capture product ID",
+									"pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
+									"var jsonData = pm.response.json();",
+									"if (jsonData && jsonData.data && jsonData.data.id) {",
+									"   pm.environment.set(\"productId\", jsonData.data.id); // Store the newly created ID",
+									"   console.log(\"New Product ID set to: \" + jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"description": "Use Staff or Admin token",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Soto Ayam\",\n    \"price\": 15000.00,\n    \"taxIds\": [] // Optional: Add existing Tax UUIDs here e.g., [\"uuid-of-ppn\", \"uuid-of-pb1\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/products",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"products"
+							]
+						},
+						"description": "Creates a new product. Link existing taxes via `taxIds`. Requires Staff or Admin auth. Captures ID to `productId` variable."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Products (Paginated)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"description": "Use Staff or Admin token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/products?sort=price,desc",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"products"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0",
+									"disabled": true
+								},
+								{
+									"key": "size",
+									"value": "10",
+									"disabled": true
+								},
+								{
+									"key": "sort",
+									"value": "price,desc"
+								}
+							]
+						},
+						"description": "Retrieves a paginated list of products. Requires Staff or Admin auth."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Product By ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"description": "Use Staff or Admin token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/products/{{productId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"products",
+								"{{productId}}"
+							],
+							"variable": [
+								{
+									"key": "productId",
+									"value": "",
+									"description": "Use the ID of the product to retrieve"
+								}
+							]
+						},
+						"description": "Retrieves a specific product. Requires Staff or Admin auth."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"description": "Use Staff or Admin token",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Soto Ayam Lamongan\",\n    \"price\": 16000.00,\n    \"taxIds\": [] // Update linked Tax UUIDs if needed\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/products/{{productId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"products",
+								"{{productId}}"
+							],
+							"variable": [
+								{
+									"key": "productId",
+									"value": "",
+									"description": "Use the ID of the product to update"
+								}
+							]
+						},
+						"description": "Updates an existing product. Requires Staff or Admin auth."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Product (Admin Only)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"description": "Use Admin token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/products/{{productId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"products",
+								"{{productId}}"
+							],
+							"variable": [
+								{
+									"key": "productId",
+									"value": "",
+									"description": "Use the ID of the product to delete"
+								}
+							]
+						},
+						"description": "Deletes a product. Requires ADMIN authentication. (Note: Service logic for checking transaction dependency is commented out)."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints for managing products (Requires Staff/Admin Auth generally)"
+		},
+		{
+			"name": "Taxes",
+			"item": [
+				{
+					"name": "Get All Taxes",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"description": "Use Staff or Admin token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/taxes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"taxes"
+							]
+						},
+						"description": "Retrieves all defined taxes. Requires Staff or Admin auth."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Tax By ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"description": "Use Staff or Admin token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/taxes/{{taxId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"taxes",
+								"{{taxId}}"
+							],
+							"variable": [
+								{
+									"key": "taxId",
+									"value": "",
+									"description": "Get a tax ID from the 'Get All' response"
+								}
+							]
+						},
+						"description": "Retrieves a specific tax. Requires Staff or Admin auth."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Tax (Admin Only)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"description": "Use Admin token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/taxes/{{taxId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"taxes",
+								"{{taxId}}"
+							],
+							"variable": [
+								{
+									"key": "taxId",
+									"value": "",
+									"description": "Use the ID of the tax to delete"
+								}
+							]
+						},
+						"description": "Deletes a tax. Requires ADMIN authentication. (Note: Service logic for checking product dependency is not implemented, Create/Update are commented out in controller)."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints for managing taxes (Mostly Admin, GET for Staff/Admin)"
+		},
+		{
+			"name": "Transactions",
+			"item": [
+				{
+					"name": "Create Transaction (Staff/Admin Only)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Capture transaction ID",
+									"pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
+									"var jsonData = pm.response.json();",
+									"if (jsonData && jsonData.data && jsonData.data.id) {",
+									"   pm.environment.set(\"transactionId\", jsonData.data.id); // Store the newly created ID",
+									"   console.log(\"New Transaction ID set to: \" + jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"description": "Use Staff or Admin token",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"customerId\": \"{{customerId}}\", // Use a valid Customer UUID (e.g., from Create Customer)\n    \"paymentMethod\": \"CASH\", // Options: CASH, TRANSFER, DEBIT_CARD, DEBIT, E_WALLET\n    \"details\": [\n        {\n            \"productId\": \"{{productId}}\", // Use a valid Product UUID (e.g., from Create Product)\n            \"quantity\": 2\n        },\n        {\n            \"productId\": \"{{anotherProductId}}\", // Use another valid Product UUID\n            \"quantity\": 1\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/transactions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"transactions"
+							]
+						},
+						"description": "Creates a new transaction record with status NOT_PAID. Calculates amounts based on product prices and linked taxes. Requires Staff or Admin auth. Captures ID to `transactionId`."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Transaction By ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"description": "Use Staff, Admin, or associated Customer token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/transactions/{{transactionId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"transactions",
+								"{{transactionId}}"
+							],
+							"variable": [
+								{
+									"key": "transactionId",
+									"value": "",
+									"description": "Use ID from Create Transaction"
+								}
+							]
+						},
+						"description": "Retrieves a specific transaction. Customers can only view their own. Requires authentication."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Transactions (Filtered & Paginated)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"description": "Use Staff, Admin, or Customer token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/transactions?startDate=2025-05-04T00:00:00&endDate=2025-05-04T23:59:59&paymentStatus=PAID&sortByNewest=true&page=0&size=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"transactions"
+							],
+							"query": [
+								{
+									"key": "customerName",
+									"value": "",
+									"description": "(String, optional, Staff/Admin only)",
+									"disabled": true
+								},
+								{
+									"key": "startDate",
+									"value": "2025-05-04T00:00:00",
+									"description": "(ISO DateTime, optional, e.g., `2025-05-04T00:00:00`)"
+								},
+								{
+									"key": "endDate",
+									"value": "2025-05-04T23:59:59",
+									"description": "(ISO DateTime, optional, e.g., `2025-05-04T23:59:59`)"
+								},
+								{
+									"key": "paymentStatus",
+									"value": "PAID",
+									"description": "(Enum, optional, can repeat: `PAID`, `NOT_PAID`, `CANCELLED`)"
+								},
+								{
+									"key": "staffId",
+									"value": "",
+									"description": "(UUID, optional, Staff/Admin only)",
+									"disabled": true
+								},
+								{
+									"key": "sortByNewest",
+									"value": "true",
+									"description": "(Boolean, optional, `true` or `false`)"
+								},
+								{
+									"key": "page",
+									"value": "0",
+									"description": "(Int, optional, default 0)"
+								},
+								{
+									"key": "size",
+									"value": "10",
+									"description": "(Int, optional, default 10)"
+								},
+								{
+									"key": "sort",
+									"value": "",
+									"description": "(String, optional, e.g., `totalAmount,desc`. Overridden by `sortByNewest` if present)",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Retrieves transactions based on filters. Customers see only their own. Requires authentication."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Transaction Status (Staff/Admin Only)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"description": "Use Staff or Admin token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/transactions/{{transactionId}}/status?status=PAID",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"transactions",
+								"{{transactionId}}",
+								"status"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "PAID",
+									"description": "(Required, Enum: `PAID`, `NOT_PAID`, `CANCELLED`)"
+								}
+							],
+							"variable": [
+								{
+									"key": "transactionId",
+									"value": "",
+									"description": "Use ID of the transaction to update"
+								}
+							]
+						},
+						"description": "Updates the payment status of a transaction. Requires Staff or Admin auth."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints for managing transactions"
+		},
+		{
+			"name": "Reports",
+			"item": [
+				{
+					"name": "Get Customer Spending (Date Range)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"description": "Use Staff, Admin, or Customer token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/reports/customer/spending/date-range?startDate=2025-05-04&endDate=2025-05-05&customerId={{customerId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"reports",
+								"customer",
+								"spending",
+								"date-range"
+							],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2025-05-04",
+									"description": "(Required, ISO Date: YYYY-MM-DD)"
+								},
+								{
+									"key": "endDate",
+									"value": "2025-05-05",
+									"description": "(Required, ISO Date: YYYY-MM-DD)"
+								},
+								{
+									"key": "customerId",
+									"value": "{{customerId}}",
+									"description": "(Optional. Required for Staff/Admin, ignored/validated for Customer)"
+								}
+							]
+						},
+						"description": "Calculates total spending for a customer within a date range (only considers PAID transactions). Customers can only query themselves. Requires authentication. **Note:** Service implementation for the query might be missing/placeholder."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Customer Spending (All Time)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"description": "Use Staff, Admin, or Customer token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/reports/customer/spending/all-time?customerId={{customerId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"reports",
+								"customer",
+								"spending",
+								"all-time"
+							],
+							"query": [
+								{
+									"key": "customerId",
+									"value": "{{customerId}}",
+									"description": "(Optional. Required for Staff/Admin, ignored/validated for Customer)"
+								}
+							]
+						},
+						"description": "Calculates total spending for a customer across all time (only considers PAID transactions). Customers can only query themselves. Requires authentication. **Note:** Service implementation for the query might be missing/placeholder."
+					},
+					"response": []
+				},
+				{
+					"name": "Download Customer Spending PDF (Date Range)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"description": "Use Staff, Admin, or associated Customer token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/reports/customer/spending/date-range/pdf?startDate=2025-05-04&endDate=2025-05-05&customerId={{customerId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"reports",
+								"customer",
+								"spending",
+								"date-range",
+								"pdf"
+							],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2025-05-04",
+									"description": "(Required, ISO Date: YYYY-MM-DD)"
+								},
+								{
+									"key": "endDate",
+									"value": "2025-05-05",
+									"description": "(Required, ISO Date: YYYY-MM-DD)"
+								},
+								{
+									"key": "customerId",
+									"value": "{{customerId}}",
+									"description": "(Optional. Required for Staff/Admin, ignored/validated for Customer)"
+								}
+							]
+						},
+						"description": "Mengunduh laporan pengeluaran pelanggan dalam format PDF untuk rentang tanggal tertentu. Mempertimbangkan transaksi PAID saja. Pelanggan hanya bisa query diri sendiri. Membutuhkan autentikasi. Ganti `{{customerId}}` dengan ID customer yang valid jika menjalankan sebagai Staff/Admin."
+					},
+					"response": []
+				},
+				{
+					"name": "Download Customer Spending PDF (All Time)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"description": "Use Staff, Admin, or associated Customer token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/reports/customer/spending/all-time/pdf?customerId={{customerId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"reports",
+								"customer",
+								"spending",
+								"all-time",
+								"pdf"
+							],
+							"query": [
+								{
+									"key": "customerId",
+									"value": "{{customerId}}",
+									"description": "(Optional. Required for Staff/Admin, ignored/validated for Customer)"
+								}
+							]
+						},
+						"description": "Mengunduh laporan total pengeluaran pelanggan sepanjang waktu dalam format PDF. Mempertimbangkan transaksi PAID saja. Pelanggan hanya bisa query diri sendiri. Membutuhkan autentikasi. Ganti `{{customerId}}` dengan ID customer yang valid jika menjalankan sebagai Staff/Admin."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints for generating reports"
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Update Own Profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"description": "Use any logged-in user's token",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"fullName\": \"My Updated Name\",\n    \"email\": \"my.new.email@example.com\",\n    \"password\": \"mynewsecurepassword123\" // Optional: Provide to change password\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/profile",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"profile"
+							]
+						},
+						"description": "Allows the currently authenticated user (Admin, Staff, or Customer) to update their own full name, email, and password. Requires authentication."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Users (Admin Only)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"description": "Use Admin token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						},
+						"description": "Retrieves a list of all users. Requires ADMIN authentication."
+					},
+					"response": []
+				},
+				{
+					"name": "Get User By ID (Admin Only)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"description": "Use Admin token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/{{userId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{userId}}"
+							],
+							"variable": [
+								{
+									"key": "userId",
+									"value": "{{adminUserId}}",
+									"description": "e.g., use `{{adminUserId}}` or `{{staffUserId}}` captured from login"
+								}
+							]
+						},
+						"description": "Retrieves a specific user by UUID. Requires ADMIN authentication."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User (Admin Only)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"description": "Use Admin token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/{{userId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{userId}}"
+							],
+							"variable": [
+								{
+									"key": "userId",
+									"value": "",
+									"description": "Use a Staff or Customer ID, avoid deleting the admin you're using"
+								}
+							]
+						},
+						"description": "Deletes a user by UUID. Requires ADMIN authentication."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints for managing users (Mostly Admin, profile update for all)"
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "authToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "customerId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "productId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "transactionId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "userId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "adminUserId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "staffUserId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "taxId",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
