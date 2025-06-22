@@ -166,5 +166,3 @@ Berikut adalah daftar endpoint yang tersedia:
     -   **Permissions**: ADMIN
 
 ---
-
-*Catatan: Beberapa detail request/response body (seperti struktur DTO lengkap) tidak dicantumkan di sini untuk keringkasan. Silakan merujuk ke kode sumber (direktori `dto`) untuk detail lengkapnya.*
