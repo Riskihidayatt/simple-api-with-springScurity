@@ -1,4 +1,4 @@
-# Live Code SpringBoot E-commerce API
+# Simple Api SpringBoot E-commerce API
 
 Aplikasi Spring Boot ini menyediakan API untuk operasi e-commerce, termasuk manajemen pengguna, pelanggan, produk, transaksi, dan laporan.
 
